@@ -224,8 +224,6 @@ class GreedySelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
         n_to_select_from = X.shape[self._axis]
         self.n_samples_in_, self.n_features_in_ = X.shape
 
-        self.n_samples_in_, self.n_features_in_ = X.shape
-
         error_msg = (
             "n_to_select must be either None, an "
             f"integer in [1, n_{self.selection_type}s] "
@@ -424,7 +422,11 @@ class GreedySelector(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
     def _get_best_new_selection(self, scorer, X, y):
         scores = scorer(X, y)
 
-        max_score_idx = np.argmax(scores)
+        # Get the score argmax, but only for idxs not already selected
+        _tmp_scores = {
+            i: score for i, score in enumerate(scores) if i not in self.selected_idx_
+        }
+        max_score_idx = max(_tmp_scores, key=_tmp_scores.get)
         if self.score_threshold is not None:
             if self.first_score_ is None:
                 self.first_score_ = scores[max_score_idx]

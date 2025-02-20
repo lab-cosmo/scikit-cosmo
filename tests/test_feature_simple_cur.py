@@ -41,6 +41,22 @@ class TestCUR(unittest.TestCase):
 
         self.assertTrue(np.allclose(selector.selected_idx_, ref_idx))
 
+    def test_unique_selected_idx_zero_score(self):
+        """
+        Tests that the selected idxs are unique, which may not be the
+        case when the score is numerically zero
+        """
+        np.random.seed(0)
+        n_samples = 10
+        n_features = 15
+        X = np.random.rand(n_samples, n_features)
+        X[:, 3] = np.random.rand(10) * 1e-13
+        X[:, 4] = np.random.rand(10) * 1e-13
+        selector_problem = CUR(n_to_select=len(X.T)).fit(X)
+        assert len(selector_problem.selected_idx_) == len(
+            set(selector_problem.selected_idx_)
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

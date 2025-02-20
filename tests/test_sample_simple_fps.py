@@ -99,6 +99,23 @@ class TestFPS(unittest.TestCase):
         self.assertEqual(len(selector.selected_idx_), 5)
         self.assertEqual(selector.selected_idx_.tolist(), self.idx[:5])
 
+    def test_unique_selected_idx_zero_score(self):
+        """
+        Tests that the selected idxs are unique, which may not be the
+        case when the score is numerically zero.
+        """
+        np.random.seed(0)
+        n_samples = 10
+        n_features = 15
+        X = np.random.rand(n_samples, n_features)
+        X[4, :] = np.random.rand(15) * 1e-13
+        X[5, :] = np.random.rand(15) * 1e-13
+        X[6, :] = np.random.rand(15) * 1e-13
+        selector_problem = FPS(n_to_select=len(X)).fit(X)
+        assert len(selector_problem.selected_idx_) == len(
+            set(selector_problem.selected_idx_)
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
